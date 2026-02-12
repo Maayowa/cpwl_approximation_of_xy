@@ -4,7 +4,7 @@ asttokens==3.0.1
 colorlog==6.10.1
 comm==0.2.3
 contourpy==1.3.3
--e git+ssh://git@github.com/quentinplsrd/cpwl_approximation_of_xy.git@655f4d51ca6c3719ab692dba992be83dc5f08bc8#egg=cpwllib
+-e .
 cycler==0.12.1
 debugpy==1.8.19
 decorator==5.2.1
