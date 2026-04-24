@@ -158,9 +158,9 @@ def equations_sum_convex(N):
             tmp_eq.append([1, -1, -1 + k / N])
         tmp_eq = np.array(tmp_eq)
         list_equations_k.append(tmp_eq)
-        a = -(2*(k - N) + 1) / (4 * N)
-        b = (2*(k - N) + 1) / (4 * N)
-        c = - (k - N)*(k - N + 1) / (4 * N**2)
+        a = (2*(k - N) + 1) / (4 * N)
+        b = -(2*(k - N) + 1) / (4 * N)
+        c = (k - N)*(k - N + 1) / (4 * N**2)
         # a = k / (2 * N)
         # b = -k / (2 * N)
         # c = k * (k + 1) / (4 * N**2) - (2 * k + 1) / (4 * N)
@@ -186,18 +186,6 @@ def evaluate_gn(x_y_array, N):
     z_minus = np.max(np.matmul(mat_minus, x_y_1.T), axis=0)
     return z_plus, z_minus
 
-
-def plot_faces_3d(faces):
-    
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    
-    poly_collection = Poly3DCollection(faces, facecolors='C1', 
-                                       linewidths=1, edgecolors='black', alpha=0.6)
-    
-    ax.add_collection3d(poly_collection)
-    
-    return
 
 
 def MILP_or_QP_variables_and_constraints_hydro(
