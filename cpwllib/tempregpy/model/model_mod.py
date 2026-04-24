@@ -50,7 +50,7 @@ class Model:
         logger = self.logger
 
         #####################
-        ###### CONVEX HULLS
+        # CONVEX HULLS
         #####################
         # gauges_hulls = {}
         # for rn in inputs['river_nodes']:
@@ -719,7 +719,7 @@ class Model:
         variables["slack_q_tot_cyc_max"] = [
             model.add_variable(lb=0, ub=25000, name=f"slack_q_tot_cyc_max_{p}")
             for p in inputs["river_nodes"]
-        ] 
+        ]
         variables["slack_q_gg_cyc_min"] = [
             model.add_variable(lb=0, ub=25000, name=f"slack_q_gg_cyc_min_{p}")
             for p in inputs["river_nodes"]
@@ -786,7 +786,7 @@ class Model:
         logger.info(f"Optimization variables sucesfully created. {list(variables)}")
 
         ###################################
-        ######## OBJECTIVE FUNCTION
+        # OBJECTIVE FUNCTION
         ###################################
         obj_fnc = mathopt.LinearExpression()
         for p in range(len(inputs["river_nodes"])):
@@ -855,6 +855,8 @@ class Model:
         ###################################
         hours_per_day = 24
         days_per_week = 7
+        # hours_per_day = 1
+        # days_per_week = 1
 
         # Constraints
         constraints = []
@@ -863,7 +865,7 @@ class Model:
         constraint_id_time = []
 
         ###################################
-        ######## ROUGH ZONES
+        # ROUGH ZONES
         ###################################
         if inputs["cnstr_rough_zone"]:
             for p in range(len(inputs["plants"])):
@@ -919,7 +921,7 @@ class Model:
                         )
                     )
         ###################################
-        ######## TOTAL RELEASE
+        # TOTAL RELEASE
         ###################################
         # Add constraints for total hourly release
         for p in range(len(inputs["river_nodes"])):
@@ -958,7 +960,7 @@ class Model:
                 )
 
         ###################################
-        ######## BINARY VARIABLES
+        # BINARY VARIABLES
         ###################################
         if inputs["sim_type"] == "MILP":
             for p in range(len(inputs["river_nodes"])):
@@ -1067,7 +1069,7 @@ class Model:
                         )
                     )
 
-            ####TODO: Introduce a daily set
+            # TODO: Introduce a daily set
             for p in range(len(inputs["river_nodes"])):
                 for d in range(days_per_week):
                     start_hour = d * hours_per_day
@@ -1090,7 +1092,7 @@ class Model:
                     )
 
         ###################################
-        ######## FLOWS BETWEEN NODES
+        # FLOWS BETWEEN NODES
         ###################################
         # Add constraint for outflows from a node p
         for i in range(len(inputs["river_nodes"])):
@@ -1156,7 +1158,7 @@ class Model:
                 )
                 # variables['q_out_flow'][p][t]))
         ###################################
-        ######## CYCLIC CONDITIONS
+        # CYCLIC CONDITIONS
         ###################################
         # Add constraint for bypass cyclic condition
         if inputs["cnstr_bp_t01t24"]:
@@ -1243,7 +1245,7 @@ class Model:
                 )
 
         ###################################
-        ######## OPERATING RANGE
+        # OPERATING RANGE
         ###################################
         if inputs["cnstr_oper_range"] is True:
             logger.info(
@@ -1283,7 +1285,7 @@ class Model:
                         )
 
         ###################################
-        ######## RAMPING RATES
+        # RAMPING RATES
         ###################################
         # Add constraint for bypass ramping rates
         if inputs["cnstr_bp_ramp"] is True:
@@ -1450,7 +1452,7 @@ class Model:
                     )
 
         ###################################
-        ######## POWER BALANCE
+        # POWER BALANCE
         ###################################
         # Add constraints for power output
         for p in range(len(inputs["river_nodes"])):
@@ -1496,49 +1498,50 @@ class Model:
                 )
 
         ###################################
-        ######## TEMPERATURE
+        # TEMPERATURE
         ###################################
         target_error = self.config.target_error
-        new_cons = []
         if self.config.bilinear_method == Methods.POLYGONS:
-            _, new_cons = MILP_or_QP_variables_and_constraints(
+            _, new_constraints = MILP_or_QP_variables_and_constraints(
                 model,
                 variables["q_gg"],
                 variables["T_gg"],
-                variables["QT_latent"],
+                # variables["QT_latent"],
                 quadratic=False,
                 target_error=target_error,
                 partition_method="polygons",
-                logarithmic_encoding=True,
+                logarithmic_encoding=False,
+                # constraints_list=constraints,
+                # constraint_id_main_list=constraint_id_main,
             )
         elif self.config.bilinear_method == Methods.TRIANGLES:
-            _, new_cons = MILP_or_QP_variables_and_constraints(
+            _, new_constraints = MILP_or_QP_variables_and_constraints(
                 model,
                 variables["q_gg"],
                 variables["T_gg"],
-                variables["QT_latent"],
+                # variables["QT_latent"],
                 quadratic=False,
                 target_error=target_error,
                 partition_method="triangles",
-                logarithmic_encoding=True,
+                logarithmic_encoding=False,
             )
         elif self.config.bilinear_method == Methods.SUM_OF_CONVEX:
-            _, new_cons = MILP_or_QP_variables_and_constraints(
+            _, new_constraints = MILP_or_QP_variables_and_constraints(
                 model,
                 variables["q_gg"],
                 variables["T_gg"],
-                variables["QT_latent"],
+                # variables["QT_latent"],
                 quadratic=False,
                 target_error=target_error,
                 partition_method="sum of convex",
-                logarithmic_encoding=True,
+                logarithmic_encoding=False,
             )
         elif self.config.bilinear_method == Methods.QUADRATIC:
-            _, new_cons = MILP_or_QP_variables_and_constraints(
+            _, new_constraints = MILP_or_QP_variables_and_constraints(
                 model,
                 variables["q_gg"],
                 variables["T_gg"],
-                variables["QT_latent"],
+                # variables["QT_latent"],
                 quadratic=True,
                 target_error=target_error,
                 partition_method="sum of convex",
@@ -1548,15 +1551,16 @@ class Model:
             raise ValueError(
                 f"Bilinear method {self.config.bilinear_method} not recognized."
             )
-        constraints += new_cons
-
-        # do_mathopt_product_linearization(
-        #     method=self.config.product_linearization.method,
+        # new_constraints, new_vars = do_mathopt_product_linearization(
+        #     config=self.config.bilinear_method,
         #     model=model,
         #     X_var=variables["q_gg"],
         #     Y_var=variables["T_gg"],
         #     Z_var=variables["QT_latent"],
         # )
+
+        constraints += new_constraints
+        # variables = variables | new_vars
 
         # Add constraint for maximum hourly temperature limit on the outflow side
         for p in range(len(inputs["river_nodes"])):

@@ -4,12 +4,13 @@ from ..logging_config import *
 from .product_linearization_simple import do_mathopt_simple_product_linearization
 from cpwllib.implementation import do_product_linearization
 
+
 @enum.unique
 class ProductLinearizationMethod(enum.Enum):
-    SINGLE = 'Single'
-    TRIANGLES = 'Triangles'
-    POLYGONS = 'Polygons'
-    SUM_OF_CONVEX = 'Sum of Convex'
+    SINGLE = "Single"
+    TRIANGLES = "Triangles"
+    POLYGONS = "Polygons"
+    SUM_OF_CONVEX = "Sum of Convex"
 
 
 @dataclass
@@ -19,11 +20,7 @@ class ProductLinearizationConfig:
 
 
 def do_mathopt_product_linearization(
-    config: ProductLinearizationConfig,
-    model,
-    X_var,
-    Y_var,
-    Z_var
+    config: ProductLinearizationConfig, model, X_var, Y_var, Z_var
 ):
     """
     Perform product linearization in MathOpt.
@@ -41,33 +38,35 @@ def do_mathopt_product_linearization(
     method = config.method
 
     if method == ProductLinearizationMethod.SINGLE:
-        constraints = do_mathopt_simple_product_linearization(model, X_var, Y_var, Z_var)
+        constraints = do_mathopt_simple_product_linearization(
+            model, X_var, Y_var, Z_var
+        )
     elif method == ProductLinearizationMethod.TRIANGLES:
         q_vars = do_product_linearization(
             model,
-            partition_method='triangles',
+            partition_method="triangles",
             N=config.N,
             X_var=X_var,
             Y_var=Y_var,
-            Z_var=Z_var
+            Z_var=Z_var,
         )
     elif method == ProductLinearizationMethod.POLYGONS:
         q_vars = do_product_linearization(
             model,
-            partition_method='polygons',
+            partition_method="polygons",
             N=config.N,
             X_var=X_var,
             Y_var=Y_var,
-            Z_var=Z_var
+            Z_var=Z_var,
         )
     elif method == ProductLinearizationMethod.SUM_OF_CONVEX:
         q_vars = do_product_linearization(
             model,
-            partition_method='sum of convex',
+            partition_method="sum of convex",
             N=config.N,
             X_var=X_var,
             Y_var=Y_var,
-            Z_var=Z_var
+            Z_var=Z_var,
         )
 
     return constraints, variables
