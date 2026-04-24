@@ -719,7 +719,7 @@ class Model:
         variables["slack_q_tot_cyc_max"] = [
             model.add_variable(lb=0, ub=25000, name=f"slack_q_tot_cyc_max_{p}")
             for p in inputs["river_nodes"]
-        ] 
+        ]
         variables["slack_q_gg_cyc_min"] = [
             model.add_variable(lb=0, ub=25000, name=f"slack_q_gg_cyc_min_{p}")
             for p in inputs["river_nodes"]
