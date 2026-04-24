@@ -143,9 +143,12 @@ def equations_sum_convex(N):
             tmp_eq.append([1, 1, -(j + 1) / N])
         tmp_eq = np.array(tmp_eq)
         list_equations_j.append(tmp_eq)
-        a = (j + 1) / (2 * N) - 0.5
-        b = j / (2 * N) + 0.5
-        c = -j * (j + 1) / (4 * N**2) + 0.25
+        a = (2*j + 1) / (4 * N)
+        b = (2*j + 1) / (4 * N)
+        c = -j * (j + 1) / (4 * N**2)
+        # a = (j + 1) / (2 * N) - 0.5
+        # b = j / (2 * N) + 0.5
+        # c = -j * (j + 1) / (4 * N**2) + 0.25
         list_coeffs_j.append(np.array([a, b, c]))
     for k in range(2 * N):
         tmp_eq = []
@@ -155,9 +158,12 @@ def equations_sum_convex(N):
             tmp_eq.append([1, -1, -1 + k / N])
         tmp_eq = np.array(tmp_eq)
         list_equations_k.append(tmp_eq)
-        a = k / (2 * N)
-        b = -k / (2 * N)
-        c = k * (k + 1) / (4 * N**2) - (2 * k + 1) / (4 * N)
+        a = -(2*(k - N) + 1) / (4 * N)
+        b = (2*(k - N) + 1) / (4 * N)
+        c = - (k - N)*(k - N + 1) / (4 * N**2)
+        # a = k / (2 * N)
+        # b = -k / (2 * N)
+        # c = k * (k + 1) / (4 * N**2) - (2 * k + 1) / (4 * N)
         list_coeffs_k.append(np.array([a, b, c]))
     return list_coeffs_j, list_equations_j, list_coeffs_k, list_equations_k
 
@@ -179,6 +185,19 @@ def evaluate_gn(x_y_array, N):
     z_plus = np.max(np.matmul(mat_plus, x_y_1.T), axis=0)
     z_minus = np.max(np.matmul(mat_minus, x_y_1.T), axis=0)
     return z_plus, z_minus
+
+
+def plot_faces_3d(faces):
+    
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    
+    poly_collection = Poly3DCollection(faces, facecolors='C1', 
+                                       linewidths=1, edgecolors='black', alpha=0.6)
+    
+    ax.add_collection3d(poly_collection)
+    
+    return
 
 
 def MILP_or_QP_variables_and_constraints_hydro(
