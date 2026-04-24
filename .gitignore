@@ -2,3 +2,15 @@
 sim_results*
 SolverType*
 venv/
+.venv/
+*/*.pkl
+*.ipynb
+experiments/
+constraints_log/
+*/constraints_log/
+*/*.parquet
+*/*.txt
+*.egg-info/
+output/
+*.py
+*.log
