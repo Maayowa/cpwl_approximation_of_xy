@@ -5,15 +5,18 @@ import polars as pl
 import numpy as np
 import matplotlib.pyplot as plt
 from cpwllib.tempregpy import Model, ModelConfig
+from cpwllib.hydro_model import HydroModel
 from ortools.math_opt.python import mathopt
 from cpwllib.tempregpy.utils import solve_result_gap
 from enum import Enum
 from cpwllib.tempregpy.model import Methods
 import cpwllib.tempregpy.user as user
 from cpwllib import DATA_DIR
+from cpwllib import build_cascade_data
 import sys
 from google.protobuf import text_format
-from helpers import constraint_writer, plot_bilinear_comparison
+
+# from helpers import constraint_writer, plot_bilinear_comparison
 
 
 # %% Run sims
@@ -21,7 +24,7 @@ from helpers import constraint_writer, plot_bilinear_comparison
 df_dicts = []
 
 SOLVE_TIME_LIMIT = 3600
-OPTIMALITY_GAP = 0.0001  # 0.005
+OPTIMALITY_GAP = 0.005  # 0.005, 0.0001
 n_vals = np.array([1, 3, 5])
 approx_errors = 1 / (
     16 * n_vals**2
@@ -46,12 +49,14 @@ for solver in [
                 target_error = 0.000001
 
             # df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
-            if os.path.exists(f"sim_results_{solver}_{method}_{target_error}.parquet"):
+            if os.path.exists(
+                f"cascade_sim_results_{solver}_{method}_{target_error}.parquet"
+            ):
                 print(
                     f"Skipping existing results for solver {solver.name} and method {method.value} with target error {target_error}"
                 )
                 df_ = pl.read_parquet(
-                    f"sim_results_{solver}_{method}_{target_error}.parquet"
+                    f"cascade_sim_results_{solver}_{method}_{target_error}.parquet"
                 )
                 df_dicts.append(df_.to_dicts()[0])
 
@@ -62,22 +67,26 @@ for solver in [
             )
 
             config = ModelConfig(
-                name="CPWL Test Model",
+                name="CPWL Cascade Hydropower Case Study",
                 solver_type=solver,
                 bilinear_method=method,
                 target_error=target_error,
             )
 
-            model = Model(config)
+            model = HydroModel(config)
 
-            excel_file = pd.ExcelFile(os.path.abspath(DATA_DIR / "User Inputs.xlsx"))
-            excel_data = excel_file.parse("Inputs")
-            inputs = user.load_inputs_from_excel(excel_data)
+            # Load excel config file and NetworkX network
+            excel_path = os.path.abspath(DATA_DIR / "cascade_hydro/cascade_input.xlsx")
+            inputs = build_cascade_data.load_hydro_inputs_from_excel(excel_path)
+            network_path = os.path.abspath(DATA_DIR / "cascade_hydro/cascade_net.yaml")
+            inputs = build_cascade_data.load_cascade_network(network_path, inputs)
+
             # continue
-            model.populate_from_inputs(inputs)
+            # model.populate_from_inputs(inputs)
+            model.build_hydro_cascade_model(inputs)
 
             # Write constraints to file
-            constraint_writer(model, solver, method)
+            # constraint_writer(model, solver, method)
 
             integer_count = 0
             continuous_count = 0
@@ -134,17 +143,12 @@ for solver in [
 
             df_ = pl.DataFrame(df_dicts[-1])
 
-            df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
-
-            # Generate comparison plot
-            if solved:
-                plot_bilinear_comparison(
-                    model, solve_result, inputs, solver, method, target_error
-                )
-
+            df_.write_parquet(
+                f"cascade_sim_results_{solver}_{method}_{target_error}.parquet"
+            )
             if method == Methods.QUADRATIC:
                 break
 
 df = pl.DataFrame(df_dicts)
-df.write_parquet("xylog_paper_sim_results_run1.parquet")
+df.write_parquet("xy_paper_cascade_results_run1.parquet")
 print(df)

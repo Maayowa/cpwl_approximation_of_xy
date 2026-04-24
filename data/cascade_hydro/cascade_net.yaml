@@ -1,0 +1,34 @@
+&id004 !!python/object:networkx.classes.digraph.DiGraph
+__networkx_cache__: {}
+_adj: &id003
+  PLT1:
+    PLT2: &id002 {}
+  PLT3: {}
+  PLT2:
+    PLT3: &id001 {}
+_node: &id006
+  PLT1: {}
+  PLT3: {}
+  PLT2: {}
+_pred: &id005
+  PLT1: {}
+  PLT3:
+    PLT2: *id001
+  PLT2:
+    PLT1: *id002
+_succ: *id003
+degree: !!python/object:networkx.classes.reportviews.DiDegreeView
+  _graph: *id004
+  _nodes: *id003
+  _pred: *id005
+  _succ: *id003
+  _weight: null
+graph: {}
+nodes: !!python/object:networkx.classes.reportviews.NodeView
+  _nodes: *id006
+out_degree: !!python/object:networkx.classes.reportviews.OutDegreeView
+  _graph: *id004
+  _nodes: *id003
+  _pred: *id005
+  _succ: *id003
+  _weight: null
