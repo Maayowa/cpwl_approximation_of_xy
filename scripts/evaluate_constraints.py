@@ -3,7 +3,6 @@ import os
 import pandas as pd
 import polars as pl
 import numpy as np
-import matplotlib.pyplot as plt
 from cpwllib.tempregpy import Model, ModelConfig
 from ortools.math_opt.python import mathopt
 from cpwllib.tempregpy.utils import solve_result_gap
@@ -12,32 +11,35 @@ from cpwllib.tempregpy.model import Methods
 import cpwllib.tempregpy.user as user
 from cpwllib import DATA_DIR
 import sys
-from google.protobuf import text_format
-from helpers import constraint_writer, plot_bilinear_comparison
-
-
+from google.protobuf import text_formaty
 # %% Run sims
 
+######### RESTART, RENAME, RERUN ###########
 df_dicts = []
 
 SOLVE_TIME_LIMIT = 3600
-OPTIMALITY_GAP = 0.0001  # 0.005
+# OPTIMALITY_GAP = 0.0005  # base value
+OPTIMALITY_GAP = 0.0001  # value from paper
+solvers = [
+    # mathopt.SolverType.GSCIP,
+    mathopt.SolverType.GUROBI,
+    # mathopt.SolverType.HIGHS,
+]  # Really do not need a solver for this
+methods = [
+    # Methods.SUM_OF_CONVEX,
+    # Methods.TRIANGLES,
+    # Methods.POLYGONS,
+    Methods.QUADRATIC,  # Not included in paper results, but we want to see how it does here
+]
+# approx_errors = [0.05, 0.01, 0.005, 0.001] # base simulation values
+# Formula for converting from eps to n is 1/16n^2
 n_vals = np.array([1, 3, 5])
 approx_errors = 1 / (
     16 * n_vals**2
 )  # error values corresponding to n = [1, 3, 5] in paper
 
-for solver in [
-    mathopt.SolverType.GUROBI,
-    mathopt.SolverType.GSCIP,
-    mathopt.SolverType.HIGHS,
-]:
-    for method in [
-        Methods.SUM_OF_CONVEX,
-        Methods.TRIANGLES,
-        Methods.POLYGONS,
-        Methods.QUADRATIC,
-    ]:
+for solver in solvers:
+    for method in methods:
         for target_error in approx_errors:
             if method == Methods.QUADRATIC and solver == mathopt.SolverType.HIGHS:
                 continue
@@ -45,17 +47,15 @@ for solver in [
             if method == Methods.QUADRATIC:
                 target_error = 0.000001
 
-            # df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
-            if os.path.exists(f"sim_results_{solver}_{method}_{target_error}.parquet"):
-                print(
-                    f"Skipping existing results for solver {solver.name} and method {method.value} with target error {target_error}"
-                )
-                df_ = pl.read_parquet(
-                    f"sim_results_{solver}_{method}_{target_error}.parquet"
-                )
-                df_dicts.append(df_.to_dicts()[0])
-
-                continue
+            # if os.path.exists(f"sim_results_{solver}_{method}_{target_error}.parquet"):
+            #     print(
+            #         f"Skipping existing results for solver {solver.name} and method {method.value} with target error {target_error}"
+            #     )
+            #     df_ = pl.read_parquet(
+            #         f"sim_results_{solver}_{method}_{target_error}.parquet"
+            #     )
+            #     df_dicts.append(df_.to_dicts()[0])
+            #     continue
 
             print(
                 f"Running with solver {solver.name} and method {method.value} with target error {target_error}"
@@ -73,7 +73,6 @@ for solver in [
             excel_file = pd.ExcelFile(os.path.abspath(DATA_DIR / "User Inputs.xlsx"))
             excel_data = excel_file.parse("Inputs")
             inputs = user.load_inputs_from_excel(excel_data)
-            # continue
             model.populate_from_inputs(inputs)
 
             # Write constraints to file
@@ -136,15 +135,11 @@ for solver in [
 
             df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
 
-            # Generate comparison plot
-            if solved:
-                plot_bilinear_comparison(
-                    model, solve_result, inputs, solver, method, target_error
-                )
-
             if method == Methods.QUADRATIC:
                 break
+            # break
 
 df = pl.DataFrame(df_dicts)
-df.write_parquet("xylog_paper_sim_results_run1.parquet")
+
+df.write_parquet("tempregpy_sim_results.parquet")
 print(df)
