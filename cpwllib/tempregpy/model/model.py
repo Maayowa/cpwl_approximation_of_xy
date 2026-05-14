@@ -1,15 +1,10 @@
 import datetime
 import logging
 from tqdm import tqdm
-from ortools.math_opt.python import mathopt
-from .xy_plot_and_constraints import MILP_or_QP_variables_and_constraints
-from .product_linearization import (
-    ProductLinearizationConfig,
-    do_mathopt_product_linearization,
-)
+from ortools.math_opt.python import mathopt, result
+from cpwllib.xy_plot_and_constraints import MILP_or_QP_variables_and_constraints
 from dataclasses import dataclass
 import enum
-from ortools.math_opt.python import result
 
 
 class Methods(enum.Enum):
@@ -719,7 +714,7 @@ class Model:
         variables["slack_q_tot_cyc_max"] = [
             model.add_variable(lb=0, ub=25000, name=f"slack_q_tot_cyc_max_{p}")
             for p in inputs["river_nodes"]
-        ] 
+        ]
         variables["slack_q_gg_cyc_min"] = [
             model.add_variable(lb=0, ub=25000, name=f"slack_q_gg_cyc_min_{p}")
             for p in inputs["river_nodes"]

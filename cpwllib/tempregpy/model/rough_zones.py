@@ -2,11 +2,12 @@ from typing import Tuple, List, Hashable
 import pandas as pd
 import numpy as np
 
+
 def create_rough_zones(
     q_min_df: pd.DataFrame,
     q_max_df: pd.DataFrame,
     row_label: Hashable | None = None,
-    upper_cap: float = 1e4
+    upper_cap: float = 1e4,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, List[str]]:
     """
     Build "intermediate" zones using a different rule:
@@ -60,9 +61,13 @@ def create_rough_zones(
 
     # 3) Basic validations
     if mins.size == 0 and maxs.size == 0:
-        raise ValueError(f"No valid rough-min or rough-max boundaries for plant {plant_name}")
+        raise ValueError(
+            f"No valid rough-min or rough-max boundaries for plant {plant_name}"
+        )
     if maxs.size == 0:
-        raise ValueError(f"No valid rough-max boundaries for plant {plant_name}; cannot define zones")
+        raise ValueError(
+            f"No valid rough-max boundaries for plant {plant_name}; cannot define zones"
+        )
 
     # 4) Build zones:
     #    zone_min[i] = maxs[i]

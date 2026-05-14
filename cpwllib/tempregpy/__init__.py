@@ -1,9 +1,7 @@
-from .utils import *
-# from .build_pywraplp import *
-from ._version import *
+from ..utils import *
 from .user import *
 from .model import *
-from .logging_config import *
+from cpwllib.logging_config import *
 
 __appname__ = "TempRegPy"
 __version__ = "0.1.1"

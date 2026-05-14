@@ -6,22 +6,20 @@ import numpy as np
 import matplotlib.pyplot as plt
 from cpwllib.tempregpy import Model, ModelConfig
 from ortools.math_opt.python import mathopt
-from cpwllib.tempregpy.utils import solve_result_gap
+from cpwllib.utils import solve_result_gap
 from enum import Enum
 from cpwllib.tempregpy.model import Methods
 import cpwllib.tempregpy.user as user
 from cpwllib import DATA_DIR
-import sys
 from google.protobuf import text_format
 from helpers import constraint_writer, plot_bilinear_comparison
-
 
 # %% Run sims
 
 df_dicts = []
 
 SOLVE_TIME_LIMIT = 3600
-OPTIMALITY_GAP = 0.0001  # 0.005
+OPTIMALITY_GAP = 0.005  # 0.005
 n_vals = np.array([1, 3, 5])
 approx_errors = 1 / (
     16 * n_vals**2

@@ -1,23 +1,13 @@
 # %% Import packages
 import os
-import pandas as pd
 import polars as pl
 import numpy as np
-import matplotlib.pyplot as plt
-from cpwllib.tempregpy import Model, ModelConfig
-from cpwllib.hydro_model import HydroModel
+from cpwllib.hydrocascade import HydroModel, ModelConfig, Methods
 from ortools.math_opt.python import mathopt
-from cpwllib.tempregpy.utils import solve_result_gap
-from enum import Enum
-from cpwllib.tempregpy.model import Methods
-import cpwllib.tempregpy.user as user
+from cpwllib.utils import solve_result_gap
+import cpwllib.hydrocascade.user as user
 from cpwllib import DATA_DIR
-from cpwllib import build_cascade_data
-import sys
 from google.protobuf import text_format
-
-# from helpers import constraint_writer, plot_bilinear_comparison
-
 
 # %% Run sims
 
@@ -77,9 +67,9 @@ for solver in [
 
             # Load excel config file and NetworkX network
             excel_path = os.path.abspath(DATA_DIR / "cascade_hydro/cascade_input.xlsx")
-            inputs = build_cascade_data.load_hydro_inputs_from_excel(excel_path)
+            inputs = user.load_hydro_inputs_from_excel(excel_path)
             network_path = os.path.abspath(DATA_DIR / "cascade_hydro/cascade_net.yaml")
-            inputs = build_cascade_data.load_cascade_network(network_path, inputs)
+            inputs = user.load_cascade_network(network_path, inputs)
 
             # continue
             # model.populate_from_inputs(inputs)
