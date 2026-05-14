@@ -8,13 +8,10 @@ venv/
 experiments/
 constraints_log/
 */constraints_log/
-*.parquetgit re
-*/*.parquet
 *.parquet
-*/*.txt
+./*.txt
 *.egg-info/
 output/
 */plotting.py
-*.py
+./*.py
 *.log
-requirements.txt
