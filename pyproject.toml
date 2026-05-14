@@ -1,6 +1,6 @@
 [project]
 name = "cpwllib"
-version = "0.0.1"
+version = "0.1.0"
 authors = [
   { name="Quentin Ploussard", email="qploussard@anl.gov" },
   { name="Maris Usis", email="musis@anl.gov" },
