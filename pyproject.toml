@@ -33,7 +33,7 @@ dependencies = [
     "matplotlib-inline==0.2.1",
     "nest-asyncio==1.6.0",
     "networkx>=3.6.1",
-    "numpy==2.4.0",
+    "numpy<2.0",
     "openpyxl==3.1.5",
     "ortools==9.14.6206",
     "packaging==25.0",
