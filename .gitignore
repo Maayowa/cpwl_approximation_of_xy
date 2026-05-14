@@ -9,7 +9,8 @@ experiments/
 constraints_log/
 */constraints_log/
 *.parquetgit re
-*/*.parquparquet
+*/*.parquet
+*.parquet
 */*.txt
 *.egg-info/
 output/
