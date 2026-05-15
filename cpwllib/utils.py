@@ -77,9 +77,3 @@ def solve_result_gap(result: mathopt.SolveResult) -> Optional[float]:
     gap = abs(primal - best_bound) / denom
     return gap
 
-
-# Example usage:
-# source_filename = "file_to_copy.txt"  # Replace with your source file name
-# destination_directory = "destination_folder"  # Replace with your destination directory
-#
-# copy_file_to_destination(source_filename, destination_directory)

@@ -21,7 +21,6 @@ from matplotlib import gridspec
 
 from typing import List, Tuple, Union
 
-
 # %% functions
 
 

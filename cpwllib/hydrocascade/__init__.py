@@ -1,11 +1,12 @@
 from ..utils import *
+
 from .user import *
 from .model import *
-from cpwllib.logging_config import *
+from ..logging_config import *
 
-__appname__ = "TempRegPy"
+__appname__ = "PydroCascade"
 __version__ = "0.1.1"
-__author__ = "Matija Pavičević"
+__author__ = "Quentin Ploussard and Oluwabunmi Iwakin"
 
 (
     SUCCESS,

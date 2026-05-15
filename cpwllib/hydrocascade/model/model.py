@@ -1,41 +1,13 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Aug 18 15:11:46 2025
-
-@author: qploussard
-"""
-import os
-import numpy as np
-import urllib
-from dateutil.relativedelta import relativedelta
-
-# from datetime import datetime, timedelta
 import datetime
-import networkx as nx
-from ortools.math_opt.python import result
-from .tempregpy.model.xy_plot_and_constraints import (
-    evaluate_gn,
-    equations_sum_convex,
-    list_faces_from_N,
-    list_faces_from_N_DC,
-    equations_from_faces_3d,
-    N_from_target_error,
-    MILP_or_QP_variables_and_constraints_hydro,
-)
-from .tempregpy import ModelConfig
-from dataclasses import dataclass
-import pickle
-import enum
 import logging
+from tqdm import tqdm
+from ortools.math_opt.python import mathopt, result
+from cpwllib.xy_plot_and_constraints import MILP_or_QP_variables_and_constraints_hydro
+from dataclasses import dataclass
+import enum
+import numpy as np
 
-import matplotlib.pyplot as plt
 
-from scipy.spatial import ConvexHull
-
-from ortools.math_opt.python import mathopt
-
-
-# %% functions
 class Methods(enum.Enum):
     TRIANGLES = "triangles"
     POLYGONS = "polygons"
@@ -43,9 +15,14 @@ class Methods(enum.Enum):
     QUADRATIC = "quadratic"
 
 
-################## TO-DO: ################
-# Unify linearization for generic problems
-################## TO-DO: ################
+@dataclass
+class ModelConfig:
+    name: str
+    solver_type: mathopt.SolverType
+    bilinear_method: Methods = Methods.TRIANGLES
+    target_error: float = 0.05
+    # product_cpwl_method: ProductCPWLMethod = ProductCPWLMethod.SINGLE
+    # product_linearization: ProductLinearizationConfig
 
 
 class HydroModel:
@@ -392,109 +369,3 @@ class HydroModel:
             solver_type=self.config.solver_type,
             params=params,
         )
-
-
-####### BEGIN CASE STUDY ############
-
-# %% retrieve case study from pickle
-
-# with open("data/database_Bunmi.pkl", "rb") as f:
-#     case_study = pickle.load(f)
-
-
-# # %% Build optimization model 2 (April 2026)
-
-# dict_models = {}
-
-
-# for formulation in ["quadratic", "triangles", "polygons", "sum of convex"]:
-
-#     quadratic = formulation == "quadratic"
-#     partition_method = quadratic * "triangles" + (not quadratic) * formulation
-
-#     print(formulation)
-
-#     model = build_hydro_cascade_model(
-#         case_study,
-#         quadratic=quadratic,
-#         target_error=0.0625,
-#         partition_method=partition_method,
-#         logarithmic_encoding=False,
-#     )
-
-#     dict_models[formulation] = model
-#     break
-# # %%
-# # solve
-
-# params = mathopt.SolveParameters(
-#     enable_output=True,
-#     relative_gap_tolerance=5e-3,
-#     time_limit=timedelta(seconds=3600),
-#     # ,threads=2
-# )
-
-# dict_results = {}
-
-# for formulation in ["quadratic", "sum of convex"]:
-#     # for formulation in ["quadratic", "triangles", "polygons", "sum of convex"]:
-
-#     print(formulation)
-
-#     result = mathopt.solve(
-#         dict_models[formulation], solver_type=mathopt.SolverType.GUROBI, params=params
-#     )
-
-#     dict_results[formulation] = result.solve_time().total_seconds()
-
-#     break
-
-
-# print(dict_results)
-
-################## END CASE STUDY ###################
-# start_date = '2022-01-01'
-# end_date = '2022-01-04 23:00'
-
-# GUROBI, quadratic: 0.71
-# SCIP, quadratic: 373.97
-
-# SCIP, triangles, 0.1: 12.66
-# SCIP, polygons, 0.1: 12.52
-# SCIP, sum of convex, 0.1: 13.54
-
-# SCIP, triangles, 0.01: 1700.89
-# SCIP, polygons, 0.01: 447.43
-# SCIP, sum of convex, 0.01: 3600 (*)
-
-# HIGHS, triangles, 0.01: 39.77
-# HIGHS, polygons, 0.01: 372.86
-# HIGHS, sum of convex, 0.01: 1573.91
-
-# GUROBI, triangles, 0.01: 5.57
-# GUROBI, polygons, 0.01: 10.57
-# GUROBI, sum of convex, 0.01: 523.57
-
-# GUROBI, triangles, 0.001: 448.37
-
-# HIGHS, triangles, 0.001: 3600 (12.01%)
-# HIGHS, sum of convex, 0.001: 3600 (Inf%)
-
-
-# start_date = '2022-01-01'
-# end_date = '2022-01-07 23:00'
-
-# GUROBI, quadratic: 3.57
-# SCIP, quadratic: 3600 (no sol)
-
-# SCIP, triangles, 0.01: 3600 (no sol)
-# SCIP, polygons, 0.01: 3600 (no sol)
-# SCIP, sum of convex, 0.01: 3600 (2.57%)
-
-# HIGHS, triangles, 0.01: 523.34
-# HIGHS, polygons, 0.01: 493.31
-# HIGHS, sum of convex, 0.01: 3600 (no sol)
-
-# GUROBI, triangles, 0.01: 19.32
-# GUROBI, polygons, 0.01: 55.18
-# GUROBI, sum of convex, 0.01: 2190.28
