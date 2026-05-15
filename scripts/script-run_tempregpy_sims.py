@@ -145,4 +145,5 @@ for solver in [
 
 df = pl.DataFrame(df_dicts)
 df.write_parquet("xylog_paper_sim_results_run1.parquet")
+df.to_csv("xylog_paper_sim_results_run1.csv", index=False)
 print(df)

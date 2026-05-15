@@ -141,4 +141,5 @@ for solver in [
 
 df = pl.DataFrame(df_dicts)
 df.write_parquet("xy_paper_cascade_results_run1.parquet")
+df.to_csv("xy_paper_cascade_results_run1.csv", index=False)
 print(df)
