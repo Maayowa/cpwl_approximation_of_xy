@@ -9,6 +9,8 @@ import cpwllib.hydrocascade.user as user
 from cpwllib import DATA_DIR
 from google.protobuf import text_format
 
+# from helpers import constraint_writer
+
 # %% Run sims
 
 df_dicts = []
@@ -19,6 +21,10 @@ n_vals = np.array([1, 3, 5])
 approx_errors = 1 / (
     16 * n_vals**2
 )  # error values corresponding to n = [1, 3, 5] in paper
+
+# Folder for saving logs
+os.makedirs("output", exist_ok=True)
+savefile_name = "xy_paper_cascade_results_run1"
 
 for solver in [
     mathopt.SolverType.GUROBI,
@@ -40,13 +46,13 @@ for solver in [
 
             # df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
             if os.path.exists(
-                f"cascade_sim_results_{solver}_{method}_{target_error}.parquet"
+                f"output/cascade_sim_results_{solver}_{method}_{target_error}.parquet"
             ):
                 print(
                     f"Skipping existing results for solver {solver.name} and method {method.value} with target error {target_error}"
                 )
                 df_ = pl.read_parquet(
-                    f"cascade_sim_results_{solver}_{method}_{target_error}.parquet"
+                    f"output/cascade_sim_results_{solver}_{method}_{target_error}.parquet"
                 )
                 df_dicts.append(df_.to_dicts()[0])
 
@@ -91,7 +97,7 @@ for solver in [
             model_proto = model.mathopt_model.export_model()
 
             # Save to file (text format)
-            with open(f"{solver}_{method}_{target_error}.txt", "w") as f:
+            with open(f"output/{solver}_{method}_{target_error}.txt", "w") as f:
                 f.write(text_format.MessageToString(model_proto))
 
             solve_result = model.solve(
@@ -134,12 +140,12 @@ for solver in [
             df_ = pl.DataFrame(df_dicts[-1])
 
             df_.write_parquet(
-                f"cascade_sim_results_{solver}_{method}_{target_error}.parquet"
+                f"output/cascade_sim_results_{solver}_{method}_{target_error}.parquet"
             )
             if method == Methods.QUADRATIC:
                 break
 
 df = pl.DataFrame(df_dicts)
-df.write_parquet("xy_paper_cascade_results_run1.parquet")
-df.to_csv("xy_paper_cascade_results_run1.csv", index=False)
+df.write_parquet(f"{savefile_name}.parquet")
+df.to_pandas().to_csv(f"{savefile_name}.csv", index=False)
 print(df)

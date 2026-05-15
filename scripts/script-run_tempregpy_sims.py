@@ -19,16 +19,20 @@ from helpers import constraint_writer, plot_bilinear_comparison
 df_dicts = []
 
 SOLVE_TIME_LIMIT = 3600
-OPTIMALITY_GAP = 0.005  # 0.005
-n_vals = np.array([1, 3, 5])
+OPTIMALITY_GAP = 0.5  # 0.005, 0.0001
+n_vals = np.array([1])
 approx_errors = 1 / (
     16 * n_vals**2
 )  # error values corresponding to n = [1, 3, 5] in paper
 
+# Folder for saving logs
+os.makedirs("output", exist_ok=True)
+savefile_name = "xy_paper_tempreg_results_run1"
+
 for solver in [
     mathopt.SolverType.GUROBI,
-    mathopt.SolverType.GSCIP,
-    mathopt.SolverType.HIGHS,
+    # mathopt.SolverType.GSCIP,
+    # mathopt.SolverType.HIGHS,
 ]:
     for method in [
         Methods.SUM_OF_CONVEX,
@@ -44,12 +48,14 @@ for solver in [
                 target_error = 0.000001
 
             # df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
-            if os.path.exists(f"sim_results_{solver}_{method}_{target_error}.parquet"):
+            if os.path.exists(
+                f"output/sim_results_{solver}_{method}_{target_error}.parquet"
+            ):
                 print(
                     f"Skipping existing results for solver {solver.name} and method {method.value} with target error {target_error}"
                 )
                 df_ = pl.read_parquet(
-                    f"sim_results_{solver}_{method}_{target_error}.parquet"
+                    f"output/sim_results_{solver}_{method}_{target_error}.parquet"
                 )
                 df_dicts.append(df_.to_dicts()[0])
 
@@ -90,7 +96,7 @@ for solver in [
             model_proto = model.mathopt_model.export_model()
 
             # Save to file (text format)
-            with open(f"{solver}_{method}_{target_error}.txt", "w") as f:
+            with open(f"output/{solver}_{method}_{target_error}.txt", "w") as f:
                 f.write(text_format.MessageToString(model_proto))
 
             solve_result = model.solve(
@@ -132,7 +138,9 @@ for solver in [
 
             df_ = pl.DataFrame(df_dicts[-1])
 
-            df_.write_parquet(f"sim_results_{solver}_{method}_{target_error}.parquet")
+            df_.write_parquet(
+                f"output/sim_results_{solver}_{method}_{target_error}.parquet"
+            )
 
             # Generate comparison plot
             if solved:
@@ -144,6 +152,6 @@ for solver in [
                 break
 
 df = pl.DataFrame(df_dicts)
-df.write_parquet("xylog_paper_sim_results_run1.parquet")
-df.to_csv("xylog_paper_sim_results_run1.csv", index=False)
+df.write_parquet(f"{savefile_name}.parquet")
+df.to_pandas().to_csv(f"{savefile_name}.csv", index=False)
 print(df)
