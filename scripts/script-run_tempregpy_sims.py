@@ -19,8 +19,8 @@ from helpers import constraint_writer, plot_bilinear_comparison
 df_dicts = []
 
 SOLVE_TIME_LIMIT = 3600
-OPTIMALITY_GAP = 0.5  # 0.005, 0.0001
-n_vals = np.array([1])
+OPTIMALITY_GAP = 0.005  # 0.005, 0.0001
+n_vals = np.array([1, 3, 5])
 approx_errors = 1 / (
     16 * n_vals**2
 )  # error values corresponding to n = [1, 3, 5] in paper
@@ -31,8 +31,8 @@ savefile_name = "xy_paper_tempreg_results_run1"
 
 for solver in [
     mathopt.SolverType.GUROBI,
-    # mathopt.SolverType.GSCIP,
-    # mathopt.SolverType.HIGHS,
+    mathopt.SolverType.GSCIP,
+    mathopt.SolverType.HIGHS,
 ]:
     for method in [
         Methods.SUM_OF_CONVEX,
