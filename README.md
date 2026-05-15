@@ -6,7 +6,10 @@
 
 ```
 python -m venv venv
-source venv/bin/activate
+# On Unix/macOS
+source .venv/bin/activate
+# On Windows
+.venv\Scripts\activate
 pip install -e .
 ```
 
@@ -14,7 +17,10 @@ pip install -e .
 
 ```
 uv venv
+# On Unix/macOS
 source .venv/bin/activate
+# On Windows
+.venv\Scripts\activate
 uv sync
 uv pip install -e .
 ```
